@@ -10,6 +10,7 @@
 
 #include <string>
 #include <ctime>
+#include <math.h>
 #include "cg/cg.h"
 
 namespace Armageddon {
@@ -28,6 +29,8 @@ namespace Armageddon {
 		cg::Vector2d _acceleration;
 		double _atrittionFactor;
 		double _mass;
+		double _maxSpeed;
+		double _movForce;
 		cg::Vector2d _arrowKeyPressed;
 
 	public:

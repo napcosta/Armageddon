@@ -24,6 +24,8 @@ namespace Armageddon {
 	void Hero::init()
 	{
 		_size = cg::Properties::instance()->getVector2d("BAT_SIZE");
+		_maxSpeed = cg::Properties::instance()->getDouble("HERO_MAX_SPEED");
+		_movForce = cg::Properties::instance()->getDouble("HERO_MOV_FORCE");
 		_winHeight = cg::Manager::instance()->getApp()->getWindow().height;
 		_velocity = cg::Vector2d(0.0, 0.0);
 		_appForce = cg::Vector2d(0.0,0.0);
@@ -35,6 +37,7 @@ namespace Armageddon {
 
 	void Hero::draw()
 	{
+
 		cg::Vector2d min = _position - _size/2.0;
 		cg::Vector2d max = _position + _size/2.0;
 		glColor3d(0.9, 0.9, 0.9);
@@ -50,16 +53,26 @@ namespace Armageddon {
 
 	void Hero::update(unsigned long elapsed_millis)
 	{
-		double time = (double) elapsed_millis;
-		if (_velocity[0] < -0.7)
-			_velocity[0] = -0.7;
-		else if (_velocity[0] > 0.7)
-			_velocity[0] = 0.7;
 
-		if (_velocity[1] < -0.7)
-			_velocity[1] = -0.7;
-		else if (_velocity[1] > 0.7)
-			_velocity[1] = 0.7;
+
+		double time = (double) elapsed_millis;
+		if (_velocity[0] < -_maxSpeed)
+			_velocity[0] = -_maxSpeed;
+		else if (_velocity[0] > _maxSpeed)
+			_velocity[0] = _maxSpeed;
+
+		if (_velocity[1] < -_maxSpeed)
+			_velocity[1] = -_maxSpeed;
+		else if (_velocity[1] > _maxSpeed)
+			_velocity[1] = _maxSpeed;
+
+/*		if ( _appForce[0] && _appForce[1]) {
+			_appForce[0] = _appForce[0] / sqrt(2.0);
+			_appForce[1] = _appForce[1]/sqrt(2.0);
+		}
+
+*/
+		printf("%f - %f \n", fabs(_velocity[0]), _velocity[1]);
 
 		_acceleration[0] = _appForce[0]/_mass;
 		_acceleration[1] = _appForce[1]/_mass;
@@ -67,7 +80,6 @@ namespace Armageddon {
 		_velocity[1] += _acceleration[1]*time;
 
 
-		printf("%f - %f\n", _arrowKeyPressed[0], _arrowKeyPressed[1]);
 
 		if (_appForce[0] > 0 && _velocity[0]<0) {
 			if (_velocity[0]>=-0.07 && _arrowKeyPressed[0] != 1) {
@@ -88,16 +100,16 @@ namespace Armageddon {
 		/* HACK: If the ship is breaking and another key is pressed, this will prevent it from
 		 * sailing away on its own */
 		else if (_appForce[0] >= 0 && _velocity[0]>0 && _arrowKeyPressed[0] == 0)
-			_appForce[0] = -1.6;
+			_appForce[0] = -_movForce;
 
 		else if (_appForce[0] <= 0 && _velocity[0] < 0 && _arrowKeyPressed[0] == 0)
-			_appForce[0] = 1.6;
+			_appForce[0] = _movForce;
 
 		else if (_appForce[1] >= 0 && _velocity[1] > 0 && _arrowKeyPressed[1] == 0)
-			_appForce[1] = -1.6;
+			_appForce[1] = -_movForce;
 
 		else if (_appForce[1] <= 0 && _velocity[1] < 0 && _arrowKeyPressed[1] == 0)
-			_appForce[1] = 1.6;
+			_appForce[1] = _movForce;
 		/**************************************************************************/
 
 		if (_appForce[1] > 0 && _velocity[1]<0) {
@@ -128,26 +140,22 @@ namespace Armageddon {
 
 	void Hero::keyBreak(int direction)
 	{
-//		int left = 1;
-	//	int up = 2;
-	//	int right = 3;
-	//	int down = 4;
 
 		switch (direction) {
-		case 1:
-			_appForce[0] = 1.6;
+		case 1: //LEFT
+			_appForce[0] = _movForce;
 			_arrowKeyPressed[0] += 1;
 			break;
-		case 2:
-			_appForce[1] = -1.6;
+		case 2: //UP
+			_appForce[1] = -_movForce;
 			_arrowKeyPressed[1] -= 1;
 			break;
-		case 3:
-			_appForce[0] = -1.6;
+		case 3: //RIGHT
+			_appForce[0] = -_movForce;
 			_arrowKeyPressed[0] -= 1;
 			break;
-		case 4:
-			_appForce[1] = 1.6;
+		case 4: //DOWN
+			_appForce[1] = _movForce;
 			_arrowKeyPressed[1] += 1;
 			break;
 
@@ -161,7 +169,6 @@ namespace Armageddon {
 	void Hero::setArrowKeyPressed(cg::Vector2d val)
 	{
 		_arrowKeyPressed = val;
-	//	printf("%f \n", _arrowKeyPressed[0]);
 	}
 
 	void Hero::onMouse(int Button, int state, int x, int y)
